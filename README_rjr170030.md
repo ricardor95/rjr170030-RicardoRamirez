@@ -1,2 +1,1 @@
-# rjr170030-RicardoRamirez
-Homework 6
+rjr170030-RicardoRamirez
