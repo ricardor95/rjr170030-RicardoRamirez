@@ -2,20 +2,42 @@
  * Usage of CDK Matrix
  *
  * File:   example1.cc
- * Author: Stephen Perkins
- * Email:  stephen.perkins@utdallas.edu
+ * Author: Ricardo Ramirez
+ * Email:  rjr170030@utdallas.edu
+ * Course: CS3377
  */
 
 #include <iostream>
 #include "cdk.h"
 
+#include <fstream>
+#include <iomanip>
+#include <stdint.h>
+#include <sstream>      // std::stringstream
 
-#define MATRIX_WIDTH 4
-#define MATRIX_HEIGHT 3
-#define BOX_WIDTH 15
+ 
+#define maxRecordStringLength 25
+#define MATRIX_WIDTH 3
+#define MATRIX_HEIGHT 5
+#define BOX_WIDTH 17
 #define MATRIX_NAME_STRING "Test Matrix"
 
 using namespace std;
+
+class BinaryFileHeader
+{
+public:
+  unsigned int magicNumber;
+  unsigned int versionNumber;
+  unsigned long long numRecord;
+};
+
+class BinaryFileRecord
+{
+public:
+  unsigned char strLength;
+  char stringBuffer[maxRecordStringLength];
+};
 
 
 int main()
@@ -65,11 +87,66 @@ int main()
   /* Display the Matrix */
   drawCDKMatrix(myMatrix, true);
 
+  /* Read from file */
+  BinaryFileHeader *myHeader = new BinaryFileHeader();
+  BinaryFileRecord *myRecords = new BinaryFileRecord();
+
+  stringstream value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11;
+
+  ifstream binInfile;
+  binInfile.open("cs3377.bin", ios::in | ios::binary);  
+
+  binInfile.read((char *) myHeader, sizeof(BinaryFileHeader));
+
   /*
-   * Dipslay a message
+   * Dipslay a message 
    */
-  setCDKMatrixCell(myMatrix, 2, 2, "Test Message");
+
+  value1 << "Magic: 0x" << hex << uppercase << myHeader->magicNumber;
+  value2 << "Version: " << dec << myHeader->versionNumber; 
+  value3 << "NumRecords: " << myHeader->numRecord;
+
+  binInfile.read((char *) myRecords, sizeof(BinaryFileRecord));
+  value4 << "strlen: " << (int) myRecords->strLength;
+  for( unsigned int i = 0 ; i < strlen(myRecords->stringBuffer) ; i ++ )
+  {
+  	value5 <<  myRecords->stringBuffer[i]; 
+  }
+
+  binInfile.read((char *) myRecords, sizeof(BinaryFileRecord));
+  value6 << "strlen: " << (int) myRecords->strLength;
+  for( unsigned int i = 0 ; i < strlen(myRecords->stringBuffer) ; i ++ )
+  {
+  	value7 <<  myRecords->stringBuffer[i]; 
+  }
+  binInfile.read((char *) myRecords, sizeof(BinaryFileRecord));
+  value8 << "strlen: " << (int) myRecords->strLength;
+  for( unsigned int i = 0 ; i < strlen(myRecords->stringBuffer) ; i ++ )
+  {
+  	value9 <<  myRecords->stringBuffer[i]; 
+  }
+  binInfile.read((char *) myRecords, sizeof(BinaryFileRecord));
+  value10 << "strlen: " << (int) myRecords->strLength;
+  for( unsigned int i = 0 ; i < strlen(myRecords->stringBuffer) ; i ++ )
+  {
+  	value11 <<  myRecords->stringBuffer[i]; 
+  }
+ 
+  setCDKMatrixCell(myMatrix, 1, 1, value1.str().c_str());
+  setCDKMatrixCell(myMatrix, 1, 2, value2.str().c_str());
+  setCDKMatrixCell(myMatrix, 1, 3, value3.str().c_str());
+  setCDKMatrixCell(myMatrix, 2, 1, value4.str().c_str());
+  setCDKMatrixCell(myMatrix, 2, 2, value5.str().c_str());
+  setCDKMatrixCell(myMatrix, 3, 1, value6.str().c_str());
+  setCDKMatrixCell(myMatrix, 3, 2, value7.str().c_str());
+  setCDKMatrixCell(myMatrix, 4, 1, value8.str().c_str());
+  setCDKMatrixCell(myMatrix, 4, 2, value9.str().c_str());
+  setCDKMatrixCell(myMatrix, 5, 1, value10.str().c_str());
+  setCDKMatrixCell(myMatrix, 5, 2, value11.str().c_str());
+
   drawCDKMatrix(myMatrix, true);    /* required  */
+
+  binInfile.close();
 
   /* So we can see results, pause until a key is pressed. */
   unsigned char x;
